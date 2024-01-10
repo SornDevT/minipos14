@@ -7,8 +7,9 @@
     @vite('resources/css/app.css')
 </head>
 <body>
-    <h1>Test Laravel Route V2</h1>
+    <h1>Test Laravel Route V3</h1>
     <p>jgiodfsjgiofjsiog fgdsjkgofpdsjkgiofd</p>
+    <h1>Update App V3</h1>
     
     <hr>
 
