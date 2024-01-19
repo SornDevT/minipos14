@@ -35,7 +35,10 @@ export const routes = [
     {
         name: 'home',
         path: '/',
-        component: Home
+        component: Home,
+        meta: {
+            middleware: [authMiddleware]
+        }
     },
     {
         name: 'login',
@@ -51,9 +54,9 @@ export const routes = [
         name: 'store',
         path: '/store',
         component: Store,
-        // meta: {
-        //     middleware: [authMiddleware]
-        // }
+        meta: {
+            middleware: [authMiddleware]
+        }
     },
     {
         name: 'pos',

@@ -89,6 +89,19 @@ export default {
                         from_email: this.email,
                         from_password: this.password,
                     }).then((res)=>{
+
+                      if(res.data.success){
+                        this.text_error = '';
+                        this.user_name ='';
+                        this.email = '';
+                        this.password = '';
+                        this.password2 = '';
+                        this.$router.push('/login');
+
+                      } else {
+                        this.text_error = res.data.message;
+                      }
+
                         console.log(res);
                     }).catch((error)=>{
                         console.log(error);
