@@ -2,7 +2,7 @@
     <div class="card">
   <h5 class="card-header">ລາຍການ ສະຕ໋ອກສິນຄ້າ</h5>
   <div class="card-body">
-    <div v-if="ShowForm">
+    <div v-if="ShowForm"> 
         <div class="text-end">
             <button class="btn btn-info me-2" :disabled="CheckFrom" @click="SaveStore()" >ບັນທຶກ</button>
             <button class="btn btn-danger" @click="CancelStore()">ຍົກເລີກ</button>
@@ -39,18 +39,19 @@
 
     <div class="table-responsive text-nowrap" v-if="!ShowForm" >
         <div class=" d-flex justify-content-between mb-2">
-            <div class=" d-flex justify-items-center">
-                <div class="d-flex justify-items-center me-2">
-                    <i class='bx bx-sort-up fs-3'></i>
-                </div>
-                <select class="form-select">
+            <div class=" d-flex justify-items-center"> 
+                <div class="d-flex justify-items-center me-2 cursor-pointer" @click="ChangSort()">
+                    <i class='bx bx-sort-up fs-3' v-if="Sort=='asc'"></i>
+                    <i class='bx bx-sort-down fs-3' v-if="Sort=='desc'"></i>
+                </div> 
+                <select class="form-select" v-model="PerPage" @change="GetStore()" >
                     <option value="5">5</option>
                     <option value="10">10</option>
                     <option value="20">20</option>
                 </select>
             </div>
             <div class=" d-flex">
-                <input type="text" class=" form-control me-2" placeholder="ຄົ້ນຫາ...">
+                <input type="text" class=" form-control me-2" v-model="Search" @keyup.enter="GetStore()" placeholder="ຄົ້ນຫາ...">
                 <button class="btn btn-primary" @click="AddStore()"><i class='bx bx-user-plus me-2 fs-5'></i> ເພີ່ມຂໍ້ມູນ</button>
             </div>
         </div> 
@@ -65,7 +66,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="list in StoreData" :key="list.id">
+          <tr v-for="list in StoreData.data" :key="list.id">
             <td> {{ list.id }} </td>
             <td>-</td>
             <td> {{ list.name  }} </td>
@@ -74,9 +75,9 @@
               <div class="dropdown">
                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
                 <div class="dropdown-menu">
-                  <a class="dropdown-item" href="javascript:void(0);"><i class='bx bx-copy-alt me-1'></i> ກ໋ອບປີ້</a>
-                  <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> ແກ້ໄຂ</a>
-                  <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> ລຶບຂໍ້ມູນ</a>
+                  <a class="dropdown-item" href="javascript:void(0);" @click="CopyStore(list.id)"><i class='bx bx-copy-alt me-1'></i> ກ໋ອບປີ້</a>
+                  <a class="dropdown-item" href="javascript:void(0);" @click="EditStore(list.id)"><i class="bx bx-edit-alt me-1"></i> ແກ້ໄຂ</a>
+                  <a class="dropdown-item" href="javascript:void(0);" @click="DeleteStore(list.id)"><i class="bx bx-trash me-1"></i> ລຶບຂໍ້ມູນ</a>
                 </div>
               </div>
             </td>
@@ -84,6 +85,8 @@
           
         </tbody>
       </table>
+      <Pagination :pagination="StoreData" :offset="4" @paginate="GetStore($event)"  />
+      <button @click="showAlert">Hello world</button>
     </div>
 
 
@@ -104,6 +107,7 @@ export default {
         return {
           ShowForm:false,
           FormType:true,
+          EditID:'',
           FormStore:{
             name:'',
             image:'',
@@ -112,6 +116,9 @@ export default {
             price_sell:'',
           },
           StoreData:[],
+          Sort:'asc',
+          PerPage:'5',
+          Search:'',
         };
     },
     computed:{
@@ -129,6 +136,24 @@ export default {
     },
 
     methods: {
+        showAlert() {
+            // Use sweetalert2
+            this.$swal({
+                title: "The Internet?",
+                text: "That thing is still around?",
+                icon: "question"
+                });
+            },
+        ChangSort(){
+                if(this.Sort == 'asc'){
+                    this.Sort = 'desc'
+                } else {
+                    this.Sort = 'asc'
+                }
+
+                this.GetStore()
+        },
+
         AddStore(){
 
             this.FormStore.name = '';
@@ -142,16 +167,50 @@ export default {
         CancelStore(){
             this.ShowForm = false;
         },
+        EditStore(id){
+            // console.log(id)
+            this.FormType = false;
+            this.EditID = id;
+
+            axios.get(`api/store/edit/${id}`,{ headers:{ "Content-Type":"multipart/form-data", Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
+                this.FormStore = res.data;
+                this.ShowForm = true;
+            }).catch((error)=>{
+                    console.log(error)
+                })
+
+        },
+        CopyStore(id){
+            // console.log(id)
+            this.FormType = true;
+            this.EditID = id;
+
+            axios.get(`api/store/edit/${id}`,{ headers:{ "Content-Type":"multipart/form-data", Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
+                this.FormStore = res.data;
+                this.ShowForm = true;
+            }).catch((error)=>{
+                    console.log(error)
+                })
+
+        },
+        DeleteStore(id){
+            axios.delete(`api/store/delete/${id},`,{ headers:{ Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
+                if(res.data.success){
+                    this.GetStore()
+                }
+            }).catch((error)=>{
+                console.log(error)
+            })
+        },
         SaveStore(){
             // ກວດປະເພດ ຟອມ FormType = true ເປັນການເພີ່ມຂໍ້ມູນ, FormType = false ເປັນການອັບເດດຂໍ້ມູນ
-            if(this.FormStore){
+            if(this.FormType){
                 // ເພີ່ມຂໍ້ມູນ
                 axios.post('api/store/add', this.FormStore, { headers:{ "Content-Type":"multipart/form-data", Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
-                    
                     if(res.data.success){
                         this.ShowForm = false
+                        this.GetStore()
                     }
-
                     // console.log(res)
                 }).catch((error)=>{
                     console.log(error)
@@ -159,11 +218,20 @@ export default {
 
             } else {
                 // ອັບເດດຂໍ້ມູນ
+                axios.post(`api/store/update/${this.EditID}`, this.FormStore, { headers:{ "Content-Type":"multipart/form-data", Authorization:"Bearer "+ this.store.get_token }}).then((res)=>{
 
+                    if(res.data.success){
+                        this.ShowForm = false
+                        this.GetStore()
+                    }
+                    // console.log(res)
+                }).catch((error)=>{
+                    console.log(error)
+                })
             }
         },
-        GetStore(){
-            axios.get('api/store', { headers:{ Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
+        GetStore(page){
+            axios.get(`api/store?page=${page}&sort=${this.Sort}&perpage=${this.PerPage}&search=${this.Search}`, { headers:{ Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
 
                     this.StoreData = res.data;
 
@@ -175,6 +243,13 @@ export default {
     },
     created(){
         this.GetStore();
+    },
+    watch:{
+        Search(){
+            if(this.Search == ''){
+                this.GetStore()
+            }
+        }
     }
 };
 </script>
