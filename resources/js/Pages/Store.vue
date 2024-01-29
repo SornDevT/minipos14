@@ -9,27 +9,32 @@
         </div>
         {{ FormStore }}
         <div class="row">
-                <div class="col-md-3">Image</div>
+                <div class="col-md-3 text-center">
+                    <img :src="image_preview" alt="" @click="$refs.img_store.click()" class="cursor-pointer rounded" style=" width: 80%;">
+
+                    <input type="file" ref="img_store" style="display: none;" @change="onSelect">
+                </div>
                 <div class="col-md-9">
+                    
                         <div class="mb-2">
                             <label for="product_name" class="form-label fs-6">ຊື່ສິນຄ້າ:</label>
                             <input type="text" class="form-control" v-model="FormStore.name" id="product_name" placeholder="..." >
                         </div>
                         <div class="mb-2">
                             <label for="product_amount" class="form-label fs-6">ຈຳນວນ:</label>
-                            <input type="text" class="form-control" v-model="FormStore.amount" id="product_amount" placeholder="..." >
+                            <cleave  :options="options" class="form-control" v-model="FormStore.amount" id="product_amount" placeholder="..." />
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-2">
                                 <label for="product_price_buy" class="form-label fs-6">ລາຄາຊື້:</label>
-                                <input type="text" class="form-control" v-model="FormStore.price_buy" id="product_price_buy" placeholder="..." >
+                                <cleave  :options="options" class="form-control" v-model="FormStore.price_buy" id="product_price_buy" placeholder="..." />
                             </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-2">
                                     <label for="product_price_sell" class="form-label fs-6">ລາຄາຂາຍ: </label>
-                                    <input type="text" class="form-control" v-model="FormStore.price_sell" id="product_price_sell" placeholder="..." >
+                                    <cleave  :options="options" class="form-control" v-model="FormStore.price_sell" id="product_price_sell" placeholder="..." />
                                 </div>
                             </div>
                         </div>
@@ -58,20 +63,24 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>ຮູບ</th>
+            <th width="30">ID</th>
+            <th width="120">ຮູບ</th>
             <th>ຊື່ສິນຄ້າ</th>
-            <th>ລາຄາຊື້</th>
-            <th>ຈັດການ</th>
+            <th width="120" class="text-center">ລາຄາຊື້</th>
+            <th width="30" class="text-center">ຈັດການ</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="list in StoreData.data" :key="list.id">
             <td> {{ list.id }} </td>
-            <td>-</td>
+            <td> 
+                <!-- {{ list.image }}  -->
+                <img :src="url + '/assets/img/'+list.image" v-if="list.image"  class=" rounded" style="width: 100%;" >
+                <img :src="url + '/assets/img/no_img.jpg'" v-else class=" rounded" style="width: 100%;" >
+            </td>
             <td> {{ list.name  }} </td>
-            <td> {{ list.price_buy }} </td>
-            <td>
+            <td class="text-end"> {{ formatPrice(list.price_buy) }} </td>
+            <td class="text-center">
               <div class="dropdown">
                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
                 <div class="dropdown-menu">
@@ -105,6 +114,8 @@ export default {
     },
     data() {
         return {
+           url: window.location.origin,
+           image_preview: window.location.origin + '/assets/img/upload-img.png',
           ShowForm:false,
           FormType:true,
           EditID:'',
@@ -119,6 +130,17 @@ export default {
           Sort:'asc',
           PerPage:'5',
           Search:'',
+          options: {
+                //   prefix: '₭ ',
+                  numeral: true,
+                  numeralPositiveOnly: true,
+                  noImmediatePrefix: true,
+                  rawValueTrimPrefix: true,
+                  numeralIntegerScale: 10,
+                  numeralDecimalScale: 2,
+                  numeralDecimalMark: ',',
+                  delimiter: '.'
+                }
         };
     },
     computed:{
@@ -139,11 +161,16 @@ export default {
         showAlert() {
             // Use sweetalert2
             this.$swal({
-                title: "The Internet?",
-                text: "That thing is still around?",
-                icon: "question"
+                title:' res.data.message',
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer:3500
                 });
             },
+        formatPrice(value) {
+            let val = (value / 1).toFixed(0).replace(",", ".");
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        },
         ChangSort(){
                 if(this.Sort == 'asc'){
                     this.Sort = 'desc'
@@ -153,13 +180,23 @@ export default {
 
                 this.GetStore()
         },
-
+        onSelect(event){
+            //  console.log(event.target.files[0])
+            this.FormStore.image = event.target.files[0]
+            let reader = new FileReader()
+            reader.readAsDataURL(this.FormStore.image)
+            reader.addEventListener("load", function(){
+                this.image_preview = reader.result
+            }.bind(this),false)
+        },
         AddStore(){
 
             this.FormStore.name = '';
             this.FormStore.amount = '';
             this.FormStore.price_buy = '';
             this.FormStore.price_sell = '';
+            this.FormStore.image = '';
+            this.image_preview = window.location.origin + '/assets/img/upload-img.png';
 
             this.ShowForm = true;
             this.FormType = true;
@@ -174,9 +211,26 @@ export default {
 
             axios.get(`api/store/edit/${id}`,{ headers:{ "Content-Type":"multipart/form-data", Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
                 this.FormStore = res.data;
+
+                if(res.data.image){
+                    this.image_preview = this.url + '/assets/img/' + res.data.image;
+                } else {
+                    this.image_preview = this.url + '/assets/img/upload-img.png';
+                }
+
                 this.ShowForm = true;
             }).catch((error)=>{
                     console.log(error)
+                    if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
                 })
 
         },
@@ -190,17 +244,73 @@ export default {
                 this.ShowForm = true;
             }).catch((error)=>{
                     console.log(error)
+                    if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
                 })
 
         },
         DeleteStore(id){
-            axios.delete(`api/store/delete/${id},`,{ headers:{ Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
-                if(res.data.success){
-                    this.GetStore()
+
+            this.$swal({
+                title: "ທ່ານແນ່ໃຈບໍ່?",
+                text: "ທີ່ຈະລຶບຂໍ້ມູນນີ້!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "ຕົກລົງ!",
+                cancelButtonText: "ຍົກເລີກ",
+                }).then((result) => {
+                if (result.isConfirmed) {
+
+
+                    axios.delete(`api/store/delete/${id},`,{ headers:{ Authorization:"Bearer "+ this.store.get_token } }).then((res)=>{
+                        if(res.data.success){
+                            this.GetStore()
+                            this.$swal({
+                                title: "ການລຶບຂໍ້ມູນ!",
+                                text: res.data.message,
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer:3500
+                            });
+                        } else {
+                        
+                            this.$swal({
+                                title: res.data.message,
+                                icon: "error",
+                                showConfirmButton: false,
+                                timer:3500
+                            });
+                        }
+                    }).catch((error)=>{
+                        console.log(error)
+                        if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
+                    })
+
+                    
                 }
-            }).catch((error)=>{
-                console.log(error)
-            })
+                });
+
+
+          
         },
         SaveStore(){
             // ກວດປະເພດ ຟອມ FormType = true ເປັນການເພີ່ມຂໍ້ມູນ, FormType = false ເປັນການອັບເດດຂໍ້ມູນ
@@ -210,10 +320,39 @@ export default {
                     if(res.data.success){
                         this.ShowForm = false
                         this.GetStore()
+
+                        this.$swal({
+                            position:'top-end',
+                            toast: true,
+                            title: res.data.message,
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer:2500
+                        });
+
+                    } else {
+
+                        this.$swal({
+                            title: res.data.message,
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer:3500
+                        });
+
                     }
                     // console.log(res)
                 }).catch((error)=>{
                     console.log(error)
+                    if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
                 })
 
             } else {
@@ -227,6 +366,16 @@ export default {
                     // console.log(res)
                 }).catch((error)=>{
                     console.log(error)
+                    if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
                 })
             }
         },
@@ -237,6 +386,16 @@ export default {
 
                 }).catch((error)=>{
                     console.log(error)
+                    if(error){
+                        if(error.response.status == 401){
+                            this.store.remove_token()
+                            this.store.remove_user()
+                            localStorage.removeItem("web_token")
+                            localStorage.removeItem("web_user")
+                            this.$router.push("/login")
+
+                        }
+                    }
                 });
         }
 
