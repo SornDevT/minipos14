@@ -9,7 +9,10 @@
         </div>
         {{ FormStore }}
         <div class="row">
-                <div class="col-md-3 text-center">
+                <div class="col-md-3 text-center " style="position: relative;">
+                    <button type="button" v-if="FormStore.image" @click="RemoveImg()" class="btn rounded-pill btn-icon btn-danger" style="position: absolute; top: 10px; right: 0px;">
+                        <i class='bx bx-trash fs-5'></i>
+                    </button>
                     <img :src="image_preview" alt="" @click="$refs.img_store.click()" class="cursor-pointer rounded" style=" width: 80%;">
 
                     <input type="file" ref="img_store" style="display: none;" @change="onSelect">
@@ -166,6 +169,11 @@ export default {
                             showConfirmButton: false,
                             timer:3500
                 });
+            },
+            RemoveImg(){
+                this.FormStore.image = '';
+                this.image_preview = window.location.origin + '/assets/img/upload-img.png';
+
             },
         formatPrice(value) {
             let val = (value / 1).toFixed(0).replace(",", ".");
