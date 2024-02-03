@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\TransectionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,14 @@ Route::controller(StoreController::class)->group(function (){
     Route::post('store/add','add');
     Route::post('store/update/{id}','update');
     Route::delete('store/delete/{id}','delete');
+});
+
+Route::controller(StoreController::class)->group(function (){
+    // Route::get('TransectionController','index');
+    // Route::get('TransectionController/edit/{id}','edit');
+    Route::post('TransectionController/add','add');
+    // Route::post('TransectionController/update/{id}','update');
+    // Route::delete('TransectionController/delete/{id}','delete');
 });
 
 
