@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TransectionController;
+use App\Http\Controllers\BillController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,13 +33,21 @@ Route::controller(StoreController::class)->group(function (){
     Route::post('store/update/{id}','update');
     Route::delete('store/delete/{id}','delete');
 });
+    // api/transection/add
+Route::controller(TransectionController::class)->group(function (){
+    // Route::get('transection','index');
+    // Route::get('transection/edit/{id}','edit');
+    Route::post('transection/add','add');
+    // Route::post('transection/update/{id}','update');
+    // Route::delete('transection/delete/{id}','delete');
+});
 
-Route::controller(StoreController::class)->group(function (){
-    // Route::get('TransectionController','index');
-    // Route::get('TransectionController/edit/{id}','edit');
-    Route::post('TransectionController/add','add');
-    // Route::post('TransectionController/update/{id}','update');
-    // Route::delete('TransectionController/delete/{id}','delete');
+Route::controller(BillController::class)->group(function (){
+    // Route::get('transection','index');
+    // Route::get('transection/edit/{id}','edit');
+    Route::get('bills/print/{id}','print_bill');
+    // Route::post('transection/update/{id}','update');
+    // Route::delete('transection/delete/{id}','delete');
 });
 
 

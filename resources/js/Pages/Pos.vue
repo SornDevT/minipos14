@@ -203,6 +203,13 @@ export default {
         ShowModal(){
             $('#confirm_pay_modal').modal('show')
         },
+        async openLink(link){
+            const response = await fetch(`${link}`,{ headers:{ Authorization: 'Bearer '+ this.store.get_token}});
+            const html = await response.text();
+            const blob = new Blob([html],{ type: "text/html"});
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, "_blank");
+        },
         ConfirmPay(){
                 axios.post('api/transection/add',{
                     customer_name: this.customer_name,
@@ -213,6 +220,17 @@ export default {
 
                     if(res.data.success){
     
+                        $('#confirm_pay_modal').modal('hide')
+                        this.customer_name = ''
+                        this.customer_tel = ''
+                        this.ListOrder = []
+                        this.CashAmount = ''
+                        this.GetStore()
+
+                        // window.open(this.url + '/api/bills/print/'+res.data.bill_id, '_blank')
+
+                        this.openLink(this.url + '/api/bills/print/'+res.data.bill_id)
+
 
                         this.$swal({
                             position:'top-end',

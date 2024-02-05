@@ -69,7 +69,8 @@
             <th width="30">ID</th>
             <th width="120">ຮູບ</th>
             <th>ຊື່ສິນຄ້າ</th>
-            <th width="120" class="text-center">ລາຄາຊື້</th>
+            <th width="120" class="text-center">ຈຳນວນ</th>
+            <th width="120" class="text-center">ລາຄຊື້</th>
             <th width="30" class="text-center">ຈັດການ</th>
           </tr>
         </thead>
@@ -82,6 +83,7 @@
                 <img :src="url + '/assets/img/no_img.jpg'" v-else class=" rounded" style="width: 100%;" >
             </td>
             <td> {{ list.name  }} </td>
+            <td class="text-end"> {{ formatPrice(list.amount) }} </td>
             <td class="text-end"> {{ formatPrice(list.price_buy) }} </td>
             <td class="text-center">
               <div class="dropdown">
