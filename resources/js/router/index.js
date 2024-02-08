@@ -33,6 +33,10 @@ const authMiddleware = (to, from, next) =>{
 
 export const routes = [
     {
+        path:'/',
+        redirect:'/store'
+    },
+    {
         name: 'home',
         path: '/',
         component: Home,

@@ -7,7 +7,7 @@
             <button class="btn btn-info me-2" :disabled="CheckFrom" @click="SaveStore()" >ບັນທຶກ</button>
             <button class="btn btn-danger" @click="CancelStore()">ຍົກເລີກ</button>
         </div>
-        {{ FormStore }}
+        <!-- {{ FormStore }} -->
         <div class="row">
                 <div class="col-md-3 text-center " style="position: relative;">
                     <button type="button" v-if="FormStore.image" @click="RemoveImg()" class="btn rounded-pill btn-icon btn-danger" style="position: absolute; top: 10px; right: 0px;">
@@ -100,7 +100,7 @@
         </tbody>
       </table>
       <Pagination :pagination="StoreData" :offset="4" @paginate="GetStore($event)"  />
-      <button @click="showAlert">Hello world</button>
+      <!-- <button @click="showAlert">Hello world</button> -->
     </div>
 
 
